@@ -1,3 +1,8 @@
-
+#create project
+npx create-react-app front-end
 npm --save install axios
+npm install --save env-cmd
+npm run start:prod  // to import prod env variables
+npm run build:prod  // to import prod env variables
+-----------------------------------
 
