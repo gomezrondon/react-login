@@ -28,6 +28,7 @@ function loginReducer(state, action) {
             return {
                 ...state,
                 isLoggedIn: false,
+                isLoading: false,
                 username: '',
                 password: ''
             }
@@ -105,6 +106,7 @@ function LoginForm(props) {
                             placeholder={"username"}
                             value={username}  //default value set
                             onChange={event => dispatchSetVal('username',event.currentTarget.value)}
+                            disabled={isLoading}
                         />
                         <input
                             type="password"
