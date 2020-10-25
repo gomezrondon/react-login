@@ -1,36 +1,91 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useReducer, useState} from 'react';
 import {login} from "./Utils";
+
+
+function loginReducer(state, action) {
+
+    switch (action.type) {
+        case 'field': {
+            return {
+                ...state,
+                [action.field]: action.value
+            }
+        }
+        case 'login': {
+            return {
+                ...state,
+                isLoading: true,
+                error: ''
+            }
+        }
+        case 'success': {
+            return {
+                ...state,
+                isLoggedIn: true
+            }
+        }
+        case 'logout': {
+            return {
+                ...state,
+                isLoggedIn: false,
+                username: '',
+                password: ''
+            }
+        }
+
+        case 'error': {
+            return {
+                ...state,
+                error: 'Incorrect username or password',
+                isLoading: false,
+                isLoggedIn: false,
+                username: '',
+                password: ''
+            }
+        }
+        default:
+            break;
+    }
+
+    return state;
+
+}
+
+
+const initialState =  {
+    username: '',
+    password: '',
+    isLoading: false,
+    error: '',
+    isLoggedIn: false
+}
 
 function LoginForm(props) {
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [state, dispatch] = useReducer(loginReducer, initialState);
 
-    useEffect(() => {
-//   console.log("isLoggedIn "+isLoggedIn)
-    }, [isLoading]);
-
+    const {username, password, isLoading, error, isLoggedIn} = state;
 
 
     const onSubmit = async (e)=> {
         e.preventDefault();
 
-        setIsLoading(true);
-        setError('');
+        dispatch({type: 'login'});
+
         try{
             await login({username, password});
-            setIsLoggedIn(true);
+            dispatch({type: 'success'});
         }catch (e) {
-            setError('Incorrect username or password');
-        }
-        setIsLoading(false);
+            dispatch({type: 'error'});
 
-       // alert("ON onSubmit "+ username+" "+password)
+        }
+
     }
 
+    const dispatchSetVal= (field, value)=>{
+        dispatch({type: 'field', field: field, value: value});
+
+    }
 
 
     return (
@@ -39,6 +94,7 @@ function LoginForm(props) {
                 isLoggedIn ? (
                     <>
                         <h1>Hola {username}</h1>
+                        <button onClick={()=> dispatch({type: 'logout'})}> Log out</button>
                     </>
                 ):(
                     <form className="form" onSubmit={onSubmit}>
@@ -48,14 +104,14 @@ function LoginForm(props) {
                             type="text"
                             placeholder={"username"}
                             value={username}  //default value set
-                            onChange={event => setUsername(event.currentTarget.value)}
+                            onChange={event => dispatchSetVal('username',event.currentTarget.value)}
                         />
                         <input
                             type="password"
                             placeholder={"password"}
                             value={password}
                             autoComplete={"new-password"}
-                            onChange={event => setPassword(event.currentTarget.value)}
+                            onChange={event => dispatchSetVal('password',event.currentTarget.value)}
                             disabled={isLoading}
                             //   style={{color: 'red'}} // how to set style directly
                             //  style={{display: "none"}} // asi se esconde un componente JS style
